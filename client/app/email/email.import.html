@@ -1,0 +1,196 @@
+<section ng-init="getLists()">
+	<span class="pull-left" ng-click="emptyCustomers()" ng-if="customers.length!=0"><a href="">Back</a></span>
+	<div style="text-align:center" ng-if="customers.length==0">
+		<span ng-show="csv_loader"><img src="assets/images/loader.gif" alt="Loading..." width="20"> Loading...</span>
+		<button class="btn btn-primary btn-lg" ng-click="importPosist()">Import customers from POSist</button>
+		OR
+		<button class="btn btn-default btn-lg" ng-click="importCSV()">Import a CSV file of customers</button>
+		<input style="display:none;" type="file" id="file-input" onchange="angular.element(this).scope().readFile()">
+		<br><br>
+		<div ng-show="lists.length!=0" class="col-md-12">
+			<h3>OR choose from your saved mailing lists</h3>
+			<div class="template-card col-md-3" ng-repeat="list in lists" ng-click="selectList(list._id)">
+				<span class="glyphicon glyphicon-remove pull-right" ng-click="$event.stopPropagation();removeList(list._id, $index)"></span>
+				<h4>{{list.name}}</h4>
+				<h6>{{list.count}} customers</h6>
+			</div>
+		</div>
+	</div>
+	<br><br>
+
+	<div ng-if="customers.length!=0">
+		<div ng-show="rejects.length" ng-init="showErr=false">
+			<span class="pull-right" style="text-align:right">{{rejects.length}} rejects due to invalid data. <a href="" ng-click="showErr=!showErr"><span ng-show="!showErr">Show errors.</span><span ng-show="showErr">Hide errors.</span></a></span>
+			<div ng-show="showErr">
+				<table class="table table-responsive">
+					<th>Row Number</th>
+					<th>Error</th>
+					<tr ng-repeat="reject in rejects" class="danger">
+						<td>{{reject.row}}</td><td>{{reject.message}}</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div ng-hide="user.deployment_id.length==0 || offers.length==0" style="text-align:right">
+			<select ng-model="offerIndex" ng-change="getOfferCodes(offerIndex)">
+				<option value="">Choose Offer</option>
+				<option ng-repeat="offer in offers" value="{{$index}}">{{offer}}</option>
+			</select>
+			<input type="text" ng-model="offerCode" uib-typeahead="code for code in codes | filter:$viewValue | limitTo:15"placeholder="Type default offer...">
+			<button class="btn btn-primary" ng-click="setCouponForAll(offerCode)">Apply</button>
+			<button class="btn btn-primary" ng-click="remCouponForAll()">Reset</button>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-hover">
+				<tr>
+					<th><input type="checkbox" ng-model="select_all" ng-change="selectAll(select_all)"/> S.no.</th>
+					<th>Name</th>
+					<th>Mobile</th>
+					<th>Email</th>
+					<th>Address</th>
+					<th>DOB</th>
+					<th>MA</th>
+					<th ng-hide="user.deployment_id.length==0 || offers.length==0">
+						Offer
+					</th>
+				</tr>
+				<tr ng-repeat="customer in customers | filter:search" ng-click="toggle(customer,$index);" id="customer-{{$index}}" style="cursor:pointer;" class="customer">
+					<td><input type="checkbox" id="check-{{$index}}"/> {{$index+1}}.</td>
+					<td>{{customer.name}}</td>
+					<td>{{customer.mobile}}</td>
+					<td>{{customer.email}}</td>
+					<td>{{customer.address||'Absent'}}</td>
+					<td>{{customer.dob||'Absent'}}</td>
+					<td>{{customer.ma||'Absent'}}</td>
+					<td ng-hide="user.deployment_id.length==0 || offers.length==0">
+						<span ng-show="!editCoupon">{{customer.coupon||'Absent'}}</span>
+						<span ng-show="editCoupon"><input type="text" ng-model="offerCodeUser" uib-typeahead="code for code in codes | filter:$viewValue | limitTo:15"placeholder="Type default offer for customers..."><button class="btn btn-primary" ng-click="setCouponForUser($index, offerCodeUser);editCoupon=false">Apply</button></span><span ng-click="editCoupon=true" class="glyphicon glyphicon-edit" ng-show="!editCoupon"> </span><span class="glyphicon glyphicon-remove" ng-show="!editCoupon" ng-click="remCouponForUser($index);"> </span>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<h3>You selected <i style="color:#4393B9">{{selectedCustomers.length}}</i> customers. <span class="pull-right"><button class="btn btn-default" ng-click="saveList()" ng-disabled="selectedCustomers.length==0">Save the selected list for future campaigns</button> <button class="btn btn-primary" ui-sref="email.create">Continue</button></h3>
+		<div ng-show="selectedCustomers.length>user.email_service.available_credits" class="error">You don't have enough credits.</div>
+	</div>
+	<div class="row" ng-if="customers.length==0">
+		<hr>
+		<p style="margin:0 10%;">NOTE: The CSV ("Comma Separated Values") file format has a <i>.csv</i> file extension. You can download the sample file by clicking <a href="data:application/octet-stream;charset=utf-8,Name,Mobile,Email,Address,DOB,MA" target="_blank" download="customers.csv">here</a>.</p><br>
+		<table class="table">
+			<caption>Example CSV File</caption>
+			<tr>
+				<th>Name</th>
+				<th>Mobile</th>
+				<th>Email</th>
+				<th>Address</th>
+				<th>DOB</th>
+				<th>MA</th>
+			</tr>
+			<tr>
+				<td>Sandeep</td>
+				<td>9899999999</td>
+				<td>sandeep@gmail.com</td>
+				<td>63/13A Kirti Nagar</td>
+				<td>31-12-1986</td>
+				<td>29-02-2010</td>
+			</tr>
+		</table>
+	</div>
+	<br><br><br><br>
+</section>
+
+<script type="text/ng-template" id="error-create.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Before you continue...</h3>
+    </div>
+    <div class="modal-body">
+       Please select the customers to whom you want to send E-Mails.
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="save-list.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Save this list...</h3>
+    </div>
+    <div class="modal-body">
+       	<form class="form" name="listForm" novalidate>
+		  <div class="form-group">
+		    <label for="listname">Give a name to your list</label>
+		    <div>
+		      <input type="text" name="name" class="form-control" id="listname" placeholder="eg. Weekend Customers" ng-model="listname" ng-maxlength="40" required>
+		      <div class="error" ng-if="error">{{error}}</div>
+		      <div ng-show="listForm.$submitted||listForm.name.$touched" class="error">
+            	<div ng-show="listForm.name.$error.maxlength">The list name is too long.</div>
+          	  </div>
+		    </div>
+		  </div>
+		</form>
+    </div>
+    <div class="modal-footer">
+    	<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-primary" type="submit" ng-click="save(listForm.$valid)">OK</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="save-tenantid.html">
+    <div class="modal-header">
+        <h3 class="modal-title" ng-show="!importing">Import Deployment Data from POS</h3>
+        <h3 class="modal-title" ng-show="importing">Importing...</h3>
+    </div>
+    <div class="modal-body">
+    	<h4 class="text-center">Enter credentials of your new deployment</h4>
+        <form class="form-horizontal" name="tenantidForm" novalidate>
+		  <div class="form-group">
+		    <label for="username" class="col-sm-2 control-label">Username</label>
+		    <div class="col-sm-10">
+		      <input type="text" name="tenant_id" class="form-control" id="username" ng-model="username" required>
+		      <div ng-show="tenantidForm.$submitted||tenantidForm.username.$touched" class="error">
+            	<div ng-show="tenantidForm.username.$error.required">This is required.</div>
+          	  </div>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label for="password" class="col-sm-2 control-label">Password</label>
+		    <div class="col-sm-10">
+		      <input type="password" name="password" class="form-control" id="password" ng-model="password" required>
+		      <div ng-show="tenantidForm.$submitted||tenantidForm.password.$touched" class="error">
+            	<div ng-show="tenantidForm.password.$error.required">This is required.</div>
+          	  </div>
+		    </div>
+		  </div>
+		  <button class="btn btn-primary pull-right" type="submit" ng-click="save(tenantidForm.$valid)">Submit</button>
+		</form>
+		<br>
+		<span class="error" ng-if="error">{{error}}</span>
+		<div ng-if="user.deployments.length!=0" class="text-center">
+			<hr>
+			<h4>Or Choose from your existing deployments</h4>
+			<div ng-show="loader"><img src="assets/images/loader.gif" style="width:50px;margin:0 auto;"/></div>
+			<div class="list-group text-left" style="width:60%;margin:0 auto;" ng-show="!loader">
+			  <li class="list-group-item" ng-repeat="dep in user.deployments">
+			  	<input type="checkbox" ng-model="variables[$index]" ng-click="toggleDeployment($index, variables[$index])"/> {{dep.name}}
+			  </li>
+			</div>
+			<br>
+			<button class="btn btn-primary" ng-disabled="deps.length==0" ng-click="selectDeployment()">Import Customers</button>
+		</div>
+    </div>
+    <div class="modal-footer">
+    	<button class="btn btn-warning" type="button" ng-click="cancel()">Close</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="removeEmailList.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Delete List</h3>
+    </div>
+    <div class="modal-body">
+       Are you sure you want to delete this list?
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="remove()">OK</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>

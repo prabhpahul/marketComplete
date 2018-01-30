@@ -1,0 +1,159 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12">
+      <h1>Change Account Password</h1>
+    </div>
+    <div class="col-sm-5">
+      <form class="form" name="passwordForm" ng-submit="changePassword(passwordForm)" novalidate>
+
+        <div class="form-group">
+          <label>Current Password</label>
+
+          <input type="password" name="password" class="form-control" ng-model="user.oldPassword"
+                 mongoose-error/>
+          <p class="help-block error" ng-show="passwordForm.password.$error.mongoose">
+              {{ errors.other }}
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>New Password</label>
+
+          <input type="password" name="newPassword" class="form-control" ng-model="user.newPassword"
+                 ng-minlength="6"
+                 required/>
+          <p class="help-block error"
+             ng-show="(passwordForm.newPassword.$error.minlength || passwordForm.newPassword.$error.required) && submitted">
+            Password must be at least 6 characters.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>Retype Password</label>
+
+          <input type="password" name="rePassword" class="form-control" ng-model="user.rePassword"
+                 ng-minlength="6"
+                 required
+                />
+          <p class="help-block error"
+             ng-show="nomatch && submitted">
+            Password does not match the above password. 
+          </p>
+        </div>
+
+        <p class="help-block"> {{ message }} </p>
+
+        <button class="btn btn-lg btn-primary" type="submit">Save changes</button>
+      </form>
+    </div>
+  </div>
+  <hr>
+  <!--div class="row" ng-if="user.$resolved && user.provider">
+    <div class="col-sm-12">
+      <h1>Reset Email Service Provider</h1>
+    </div>
+    <div class="col-sm-12">
+      By choosing this option you will be able to reset your email service provider i.e. <b>{{user.provider}}</b>.<br>
+      <button class="btn btn-lg btn-danger" type="submit" ng-click="setProvider('none')">Yes, I want to reset.</button>
+    </div>
+     <div class="col-sm-12" style="margin-top:10px;">
+      Send an Email to test if you entered the correct credentials for {{user.provider}}. A test email will be sent to your email address i.e. {{user.email}}<br>  
+      <button class="btn btn-lg btn-info" type="submit" ng-click="testEmail()">Send me a test email.</button><br><br>
+      <div class="text-success">{{success}}</div>
+      <div class="text-danger">{{error}}</div>
+    </div>
+  </div>
+  <div class="row" ng-if="user.$resolved && !user.provider">
+    <div class="col-sm-12">
+      <h1>Select Email Service Provider</h1>
+    </div>
+    <div class="col-sm-12">
+    <h4>It seems you don't have a mailing service preference setup. Choose from what we currently support - </h4>
+      <div class="mail-service-card link" style="float:left;" ng-click="setProvider('sendgrid')">
+        <div class="service-img col-md-3">  
+          <img src="assets/images/sendgrid.png" alt="SendGrid" class="img-responsive">
+        </div>
+        <div class="service-text col-md-9">
+          FREE PLAN 12,000 emails per month.<br>
+          <a href="https://sendgrid.com/pricing" target="_blank">See their email plans and pricing.</a>
+          Sign up for an account and use the credentials to continue.
+        </div>
+      </div>
+      <div class="mail-service-card link" style="float:left;" ng-click="setProvider('mailchimp')">
+        <div class="service-img col-md-3">  
+          <img src="assets/images/mailchimp.jpg" alt="MailChimp" class="img-responsive">
+        </div>
+        <div class="service-text col-md-9">
+          FREE PLAN 12,000 emails per month.<br>
+          <a href="http://mailchimp.com/pricing/" target="_blank">See their email plans and pricing.</a>
+          Sign up for an account and use the API KEY to continue.
+        </div>
+      </div>
+    </div>
+  </div-->
+</div>
+
+<footer class="footer">
+  <div class="container">
+      <p>POSist | 2016</p>
+  </div>
+</footer>
+
+<script type="text/ng-template" id="saveProviderSendgrid.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Credentials for SendGrid</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal" name="sendgridForm" novalidate>
+      <div class="form-group">
+        <label for="inputUser3" class="col-sm-2 control-label">Username</label>
+        <div class="col-sm-10">
+          <input type="text" name="username" class="form-control" id="inputEmail3" placeholder="Username" ng-model="username" required>
+          <div ng-show="sendgridForm.$submitted||sendgridForm.username.$touched" class="error">
+              <div ng-show="sendgridForm.username.$error.required">Username is required.</div>
+              </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+        <div class="col-sm-10">
+          <input type="password" name="password" class="form-control" id="inputPassword3" placeholder="Password" ng-model="password" required>
+           <div ng-show="sendgridForm.$submitted||sendgridForm.password.$touched" class="error">
+              <div ng-show="sendgridForm.password.$error.required">Password is required.</div>
+               </div>
+        </div>
+      </div>
+    </form>
+    <br>
+    <span class="error" ng-if="error">{{error}}</span>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit" ng-click="save(sendgridForm.$valid)">SAVE</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="saveProviderMailchimp.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Credentials for MailChimp</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal" name="mailchimpForm" novalidate>
+      <div class="form-group">
+        <label for="inputPassword3" class="col-sm-2 control-label">API KEY</label>
+        <div class="col-sm-10">
+          <input type="text" name="password" class="form-control" id="inputPassword3" placeholder="Password" ng-model="password" required>
+           <div ng-show="mailchimpForm.$submitted||mailchimpForm.password.$touched" class="error">
+              <div ng-show="mailchimpForm.password.$error.required">API KEY is required.</div>
+               </div>
+        </div>
+      </div>
+    </form>
+    <br>
+    <span class="error" ng-if="error">{{error}}</span>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit" ng-click="save(mailchimpForm.$valid)">SAVE</button>
+    </div>
+</script>

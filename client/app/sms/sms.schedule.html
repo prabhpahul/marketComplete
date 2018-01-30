@@ -1,0 +1,87 @@
+<section ng-init="initSMS()">
+	<form class="form-horizontal" name="smsForm" novalidate>
+	  <div class="form-group">
+	    <label for="from" class="col-sm-2 control-label">From:</label>
+	    <div class="col-sm-7">
+	      	<div ng-if="!user.sender_ids.length">You don't have a sender ID yet.</div>
+	      	<div ng-if="user.sender_ids.length!=0">
+	      		<select ng-model="sms.sender_id" required>
+	      			<option ng-repeat="sender in user.sender_ids" value="{{sender.name}}" ng-disabled="!sender.status">
+	      				{{sender.name}}
+	      			</option>
+	      		</select>
+	      	</div>
+	    </div>
+	    <div class="col-sm-3 text-right">
+	    	<button class="btn btn-default" ng-click="requestSenderID()">Request new Sender ID</button>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label for="to" class="col-sm-2 control-label">To:</label>
+	    <div class="col-sm-10">
+	      <input type="text" class="form-control" id="to" value="{{showNumbers}}" disabled>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	  	<label for="message" class="col-sm-2 control-label">Message:</label>
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <div id="content"></div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label for="send_at" class="col-sm-2 control-label">Send:</label>
+	    <div class="col-sm-10">
+	    	<label class="radio-inline">
+	      		<input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="true" ng-model="sms.asap" /> As soon as possible
+	      	</label>
+	      	<label class="radio-inline">
+	      		<input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="" ng-model="sms.asap" />At a scheduled time
+	      	</label>
+		    <div ng-show="!sms.asap">
+		    	<div class="col-md-6">
+			      	<input type="date" class="form-control" uib-datepicker-popup min-date="minDate" max-date="maxDate" ng-model="sms.schedule.date" ng-required="true" close-text="Close" ng-click="openCalendar=!openedCalendar" is-open="openCalendar" style="margin-top:34px;" />
+			      	<div ng-show="dateErr">
+			      		<span class="error">Please choose a valid date and time</span>
+			      	</div>
+		        </div>
+		        <div class="col-md-6">
+	          		<uib-timepicker ng-model="sms.schedule.time" hour-step="1" minute-step="1" show-meridian="true"></uib-timepicker>
+	          	</div>
+	        </div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <button type="submit" class="btn btn-primary" ng-disabled="smsForm.$invalid || sms.sender_id=='' || dateErr ||!user.sms_service.status || selectedCustomers.length>user.sms_service.available_credits" ng-click="sendSMS(smsForm.$valid)">Send</button>
+	    </div>
+	    <div ng-show="selectedCustomers.length>user.sms_service.available_credits" class="error">You don't have enough credits.</div>
+	  </div>
+	</form>
+</section>
+
+<script type="text/ng-template" id="saveSenderID.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Give a 6 character Sender ID</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal" name="senderidForm" novalidate>
+		  <div class="form-group">
+		    <label for="senderid" class="col-sm-2 control-label">Sender ID</label>
+		    <div class="col-sm-10">
+		      <input type="text" name="name" class="form-control" id="senderid" placeholder="FLPKRT" ng-model="name" ng-maxlength="6" ng-minlength="6" ng-pattern="/^[a-zA-Z]+$/" required>
+		      <div ng-show="senderidForm.$submitted||senderidForm.name.$touched" class="error">
+            	<div ng-show="senderidForm.name.$error.required">This is required.</div>
+            	<div ng-show="senderidForm.name.$error.minlength">The ID should have 6 characters.</div>
+            	<div ng-show="senderidForm.name.$error.maxlength">The ID should have 6 characters.</div>
+            	<div ng-show="senderidForm.name.$error.pattern">The ID cannot have numbers.</div>
+          	  </div>
+		    </div>
+		  </div>
+		</form>
+		<br>
+		<span class="error" ng-if="error">{{error}}</span>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit" ng-click="save(senderidForm.$valid)">SAVE</button>
+    </div>
+</script>

@@ -1,0 +1,10 @@
+.state_loader{
+	height: 20vh;
+	width: 100vw;
+	z-index: 1000;
+	background-color: #4393B9;
+	font-size: 60px;
+	color: white;
+	text-align: center;
+	line-height: 3em;
+}

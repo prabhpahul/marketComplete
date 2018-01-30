@@ -1,0 +1,11 @@
+<section>
+	<form name="campaignForm" class="col-sm-8 col-sm-offset-2">
+		<h1 style="color:rgba(0,0,0,0.5)">Start or choose a campaign</h1>
+		<input type="text" ng-model="campaign.name" uib-typeahead="campaign for campaign in myCampaigns | filter:$viewValue | limitTo:8"placeholder="Campaign name..." required="true" class="form-control">
+		<div ng-show="campaignForm.$submitted||campaignForm.campaign.$touched">
+			<div ng-show="campaignForm.campaign.$error.required" class="error">Please specify a name for the campaign</div>
+		</div>
+		<br>
+		<button class="btn btn-primary" type="submit" ui-sref="email.import">Continue</button>
+	</form>
+</section>

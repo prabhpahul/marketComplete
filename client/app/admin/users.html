@@ -1,0 +1,157 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+<section class="container">
+  <div class="col-md-12">
+    <div class="pull-left">
+      <input type="text" ng-model="query" placeholder="Enter Email or Username...">
+      <button class="btn btn-default" ng-click="search(query)">Find</button>
+      <button class="btn btn-default" ng-click="find(10,0);query=''">Refresh</button>
+      <span ng-if="mainLoader"><img src="assets/images/loader.gif" alt="Loading..." width="20"> Loading...</span>
+      <span ng-if="error">{{error}}</span>
+    </div>
+    <div class="pull-right">
+      <button class="btn btn-primary" ng-click="skip=skip-10;find(10,skip)" ng-disabled="skip<=0"><span class="glyphicon glyphicon-chevron-left"></span></button>
+      <button class="btn btn-primary" ng-click="skip=skip+10;find(10,skip)" ng-disabled="customers.length<10"><span class="glyphicon glyphicon-chevron-right"></span></button>
+    </div>
+  </div>
+  <br><br>
+  <div style="overflow-x:scroll;" class="col-md-12">
+    <table class="table table-bordered table-responsive" ng-init="find(10,0)">
+      <tr>
+        <th>S.No.</th>
+        <th>Email</th>
+        <th>Username</th>
+        <th>Channel</th>
+        <th>Available Credits</th>
+        <th>Topup</th>
+        <th>Service Status</th>
+        <th>Credit History</th>
+        <th>Channel</th>
+        <th>Available Credits</th>
+        <th>Topup</th>
+        <th>Service Status</th>
+        <th>Sender IDs</th>
+        <th>Credit History</th>
+      </tr>
+      <tr ng-repeat="customer in customers" ng-if="customers.length!=0">
+  	     <td>{{$index+1}}</td>
+  	    <td>{{customer.email}}</td>
+  	    <td>{{customer.username}}</td>
+  	     <td style="background-color: #eee;">Email</td>
+  	      <td>{{customer.email_service.available_credits||'NIL'}}</td>
+  	      <td>
+  	      	<input type="text" ng-model="email_topup" class="form-control input-sm" style="width:70px;"/>
+  	      	<button class="btn btn-danger btn-xs" ng-click="updateTopup('email',customer._id,email_topup,-1);email_topup=''"><span class="glyphicon glyphicon-minus"></span></button>
+  	      	<button class="btn btn-info btn-xs" ng-click="updateTopup('email',customer._id,email_topup,1);email_topup=''"><span class="glyphicon glyphicon-plus"></span></button>
+  	      </td>
+  	
+  	      <td>
+  	      	<div class="onoffswitch">
+  	          <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switchemail-{{$index}}" ng-model="email_status" ng-click="updateStatus('email', customer._id, email_status, $index)" ng-checked="customer.email_service.status">
+  	          <label class="onoffswitch-label" for="switchemail-{{$index}}">
+  	              <span class="onoffswitch-inner"></span>
+  	              <span class="onoffswitch-switch"></span>
+  	          </label>
+  	      	</div>
+  	      </td>
+  	      <td>
+  	      	<button class="btn btn-primary" ng-click="viewHistory('email',customer._id)">View</button>
+  	      </td>
+  	     <td style="background-color: #eee;">SMS</td>
+  			<td>{{customer.sms_service.available_credits||'NIL'}}</td>
+  			<td>
+  				<input type="text" ng-model="sms_topup" class="form-control input-sm" style="width:70px;"/>
+  				<button class="btn btn-danger btn-xs" ng-click="updateTopup('sms',customer._id,sms_topup,-1);sms_topup=''"><span class="glyphicon glyphicon-minus"></span></button>
+  				<button class="btn btn-info btn-xs" ng-click="updateTopup('sms',customer._id,sms_topup,1);sms_topup=''"><span class="glyphicon glyphicon-plus"></span></button>
+  			</td>
+  			
+  			<td>
+  				<div class="onoffswitch">
+  				  <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switchSMS-{{$index}}" ng-model="sms_status" ng-click="updateStatus('sms', customer._id, sms_status, $index)" ng-checked="customer.sms_service.status">
+  				  <label class="onoffswitch-label" for="switchSMS-{{$index}}">
+  				      <span class="onoffswitch-inner"></span>
+  				      <span class="onoffswitch-switch"></span>
+  				  </label>
+  				</div>
+  			</td>
+  			<td>
+  		      	<button class="btn btn-primary" ng-click="viewSenderIds(customer)">View</button>
+  		    </td>
+  		    <td>
+  		      	<button class="btn btn-primary" ng-click="viewHistory('sms',customer._id)">View</button>
+  		    </td>
+  	</tr>
+    </table>
+  </div>
+  <h4 ng-if="customers.length==0">No Customers Found</h4>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+      <p>POSist | 2016</p>
+  </div>
+</footer>
+
+<script type="text/ng-template" id="view-history.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Credit History</h3>
+    </div>
+    <div class="modal-body" ng-if="type=='email'">
+       <table class="table table-bordered">
+       		<caption>Email Credit History</caption>
+            <tr>
+       			<th>Date</th>
+       			<th>Credits</th>
+       		</tr>
+       		<tr ng-repeat="credit in credits">
+       			<td>{{credit.time|date:'medium'}}</td>
+       			<td>{{credit.credit*credit.sign}}</td>
+       		</tr>
+       </table>
+    </div>
+    <div class="modal-body" ng-if="type=='sms'">
+        <table class="table table-bordered">
+        	<caption>SMS Credit History</caption>
+            <tr>
+       			<th>Date</th>
+       			<th>Credits</th>
+       		</tr>
+       		<tr ng-repeat="credit in credits">
+       			<td>{{credit.time|date:'medium'}}</td>
+       			<td>{{credit.credit*credit.sign}}</td>
+       		</tr>
+       </table>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-warning" type="button" ng-click="close()">Cancel</button>
+    </div>
+</script>
+
+<script  type="text/ng-template" id="view-senderids.html">
+	<div class="modal-header">
+        <h3 class="modal-title">Sender IDs</h3>
+    </div>
+    <div class="modal-body">
+       <table class="table table-bordered">
+       		<tr>
+       			<th>Sender ID</th>
+       			<th>Status</th>
+       		</tr>
+       		<tr ng-repeat="id in customer.sender_ids">
+       			<td>{{id.name}}</td>
+       			<td>
+       				<div class="onoffswitch">
+					  <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switchSenderID-{{$index}}" ng-model="id_status" ng-click="senderIdStatus(customer._id, id.name, id_status, $index)" ng-checked="id.status">
+					  <label class="onoffswitch-label" for="switchSenderID-{{$index}}">
+					      <span class="onoffswitch-inner"></span>
+					      <span class="onoffswitch-switch"></span>
+					  </label>
+					</div>
+       			</td>
+       		</tr>
+       </table>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-warning" type="button" ng-click="close()">Cancel</button>
+    </div>
+</script>

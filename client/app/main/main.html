@@ -1,0 +1,79 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+
+<header class="hero-unit" id="banner" ng-if="!authentication.$resolved">
+  <div class="container">
+    <h1>POSist</h1>
+    <p class="lead">Kick-start your next marketing campaign with our awesome customer engagement platform.</p>
+    <img src="assets/images/posist2.png" alt="I'm POSist">
+  </div>
+</header>
+<div ng-if="!authentication.$resolved">
+  <div class="email-marketing">
+    <div class="container">
+      <div class="col-md-12 text-center">
+        <a href="" class="home-action">Request Demo</a>
+      </div>
+      <div class="col-md-12">
+        <div class="col-md-6">
+          <img src="assets/images/email.jpg"/>
+        </div>
+        <div class="col-md-6">
+          Email your latest deals effortlessly.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sms-marketing">
+    <div class="container">
+      <div class="col-md-12">
+        <div class="col-md-6" style="padding-top:25px;text-align:right;">
+          Engage through SMS with your customers easily.
+        </div>
+        <div class="col-md-6">
+          <img src="assets/images/mobile.jpg" class="img-responsive"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="template-marketing">
+    <div class="container">
+      <div class="col-md-12">
+        <div class="col-md-6">
+          <img src="assets/images/template.jpg" class="img-responsive"/>
+        </div>
+        <div class="col-md-6" style="padding-top:25px;text-align:right;">
+          Personalize E-mail and SMS templates for a stronger connect with your customers. 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container" ng-if="authentication.$resolved" style="margin-bottom:30px;">
+  <h1 align="center" style="color:rgba(0,0,0,0.5)">Choose your way to begin!</h1>
+  <div class="col-md-12">
+    <div class="col-md-6">
+      <a ng-click="change('/email')" style="float:right;text-align:center;">
+        <div class="card link">
+          <img src="assets/images/email.png" alt="Email" class="img-responsive">
+        </div>
+        Email
+      </a>
+    </div>
+    <div class="col-md-6">
+      <a ng-click="change('/sms')" style="float:left;text-align:center;">
+        <div class="card link">
+          <img src="assets/images/sms.png" alt="SMS" class="img-responsive">
+        </div>
+        SMS
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+      <p>POSist | 2016</p>
+  </div>
+</footer>

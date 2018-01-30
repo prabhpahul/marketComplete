@@ -1,0 +1,31 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+<div class="text-center" style="background-color: #2ecc71;position:relative;width:100%;z-index:300;color:white;top:-20px" id="sms_status"></div>
+<header class="progress-title" id="banner">
+  <div class="container">
+    <h1 ng-show="!state_loader">SMS Engagement <span ng-if="campaign.name">({{campaign.name}})</span></h1>
+    <h1 ng-show="state_loader">Loading...please wait</h1>
+    <p class="lead"></p>
+  </div>
+</header>
+<br>
+
+<div class="container">
+  <div class="col-md-2">
+    <div class="list-group">
+      <a href="#" class="list-group-item" ui-sref-active-if="sms.campaign" ui-sref="sms.campaign">STEP 1: Campaign</a>
+      <a href="#" class="list-group-item" ui-sref-active-if="sms.import" ui-sref="sms.import">STEP 2: Import</a>
+      <a href="#" class="list-group-item" ui-sref-active-if="sms.create" ui-sref="sms.create">STEP 3: Create</a>
+      <a href="#" class="list-group-item" ui-sref-active-if="sms.schedule" ui-sref="sms.schedule">STEP 4: Schedule</a>
+    </div>
+    <div class="list-group">
+      <a href="#" class="list-group-item" ui-sref-active="active" ui-sref="sms.view">All Campaigns</a>
+    </div>
+    <div>Available Credits: <b>{{user.sms_service.available_credits||0}}</b></div>
+  </div>
+  <div class="col-md-10" ui-view></div>
+</div>
+<footer class="footer">
+  <div class="container">
+      <p>POSist | 2016</p>
+  </div>
+</footer>

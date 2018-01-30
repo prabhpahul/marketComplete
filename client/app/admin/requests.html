@@ -1,0 +1,27 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+<section class="container">
+	<h2>New Requests</h2>
+	<hr>
+	<table class="table table-bordered">
+		<tr>
+			<th>S.No. <span ng-if="loader"><img src="assets/images/loader.gif" alt="Loading..." width="20"></span></th>
+	      	<th>Email</th>
+	      	<th>Username</th>
+	      	<th>Sender ID</th>
+	      	<th>Accept</th>
+	      	<th>Reject with reason</th>
+	    </tr>
+	    <tr ng-repeat="customer in customers">
+	    	<td>{{$index+1}}</td>
+	    	<td>{{customer.email}}</td>
+	    	<td>{{customer.username}}</td>
+	    	<td>{{customer.sender_ids.name}}</td>
+	    	<td><button class="btn btn-success" ng-click="senderIdApprove(customer._id, customer.sender_ids.name, $index)">Accept</button></td>
+	    	<td>
+	    		<textarea ng-model="reason"></textarea><br>
+	    		<button class="btn btn-danger" ng-disabled="!reason" ng-click="senderIdReject(customer._id, customer.sender_ids.name, $index, reason)">Reject</button>
+	    	</td>
+	    </tr>
+	</table>
+	<div ng-if="customers.length==0">No Requests.</div>
+</section>

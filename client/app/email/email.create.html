@@ -1,0 +1,85 @@
+<section ng-init="getTemplates();">
+    <ul class="nav nav-tabs">
+      <li ng-click="isActive[0].active=true;isActive[1].active=false;preview=false;" role="presentation" ng-class="isActive[0].active?'active':''"><a href="#">Templates</a></li>
+      <li ng-click="newTemplate()" role="presentation" ng-class="isActive[1].active?'active':''"><a href="#">New Template</a></li>
+    </ul>
+	<div ng-show="isActive[0].active">
+		<div class="no-template" ng-if="templates.length==0">You have no saved templates.</div>
+		<div class="container">
+    		<div class="template-card col-md-3" id="template-{{$index}}" ng-repeat="template in templates" ng-click="selectTemplate(template, $index)">
+                <span class="glyphicon glyphicon-remove pull-right" ng-click="$event.stopPropagation();removeTemplate(template._id, $index)"></span>
+                <h3>{{template.name}}</h3>
+                <span class="glyphicon glyphicon-edit pull-right" ng-click="$event.stopPropagation();editTemplate(template,$index);"></span>
+            </div>
+		</div>
+        <br><br>
+        <div class="row">
+            <span ng-if="selectedTemplate.name" class="pull-left">You have selected <i style="color:#4393B9">{{selectedTemplate.name}}</i> as your E-mail Template.</span>
+            <span class="pull-right"><button class="btn btn-primary" ui-sref="email.schedule({body: selectedTemplate.body})">Continue</button></span>
+        </div>
+	</div>
+	<div ng-show="isActive[1].active">
+		<br>
+		<div ng-show="!preview">
+            <div ng-hide="hideHelp" class="alert alert-warning alert-dismissible well" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="hideHelp=true">
+                <span aria-hidden="true">&times;</span></button>
+              To use any customer related data such as name, email or mobile no, that your CSV or imported data contains, use this syntax - <code ng-non-bindable>{{name}} or {{email}} or {{mobile}}</code><br>For eg. If you want to send an Email beginning like - <code>Hello Rahul!</code><br>Write it in the box as - <code ng-non-bindable>Hello {{name}}!</code> or click the buttons below to insert them -<br><button class="btn btn-default" ng-repeat="(key,value) in selectedCustomers[0]" ng-click="insertCustomerData(key)">{{key}}</button></div>
+        	<div text-angular ng-model="htmlContent" name="demo-editor" ta-text-editor-class="border-around" ta-html-editor-class="border-around" ta-toolbar="toolbar" style="width:100%;overflow:auto;"></div>
+    	</div>
+    	<div ng-show="preview">
+    		<div id="prev" style="overflow:auto;"></div>
+    		<br>
+    	</div>
+    	<span class="pull-left"><button class="btn btn-default" ng-click="saveTemplate(htmlContent)">Save this Template</button> <button class="btn btn-default" ng-click="showPreview(htmlContent);preview=!preview"><span ng-if="!preview">Show Preview</span><span ng-if="preview">Back To Editor</span></button> <button ng-if="user.provider && user.email_service.status" class="btn btn-info" ng-click="sendSample(htmlContent)">Send a sample email to {{user.email}}</button></span>
+        <br><br>
+        <div class="row">
+            <span ng-if="selectedTemplate.name" class="pull-left">You have selected <i style="color:#4393B9">{{selectedTemplate.name}}</i> as your E-mail Template.</span>
+            <span class="pull-right"><button class="btn btn-primary" ui-sref="email.schedule({body: htmlContent})">Continue</button></span>
+        </div>
+    </div>
+</section>
+
+<script type="text/ng-template" id="error-schedule.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Before you continue...</h3>
+    </div>
+    <div class="modal-body">
+       Please select a pre-existing template or create a new one.
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="saveEmailTemplate.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Save Template</h3>
+    </div>
+    <div class="modal-body">
+        <div ng-if="selectedTemplate.name">
+            Should we replace the body of this template with this new one? <button class="btn btn-primary" type="button" ng-click="replace()">YES, Edit it.</button>
+            <hr>
+        </div>
+        Give a name to create a new template<br>
+       <input type="text" ng-model="templateName" class="form-control" placeholder="My first campaign" maxlength="20"/>
+       <span class="error" ng-if="error">{{error}}</span>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-primary" type="button" ng-click="save()">SAVE</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="removeEmailTemplate.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Delete Template</h3>
+    </div>
+    <div class="modal-body">
+       Are you sure you want to delete this template?
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="remove()">OK</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>

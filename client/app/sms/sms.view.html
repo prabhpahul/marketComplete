@@ -1,0 +1,48 @@
+<section ng-init="findUserMessages();next=0;">
+	<span class="pull-right" ng-if="messages.length>0">Showing results {{next+1}} to {{next+messages.length}}</span>
+	<button class="btn btn-primary" ng-click="next=next>=10?next-10:0;findUserMessages(next)" ng-disabled="next==0"><span class="glyphicon glyphicon-chevron-left"></span></button>
+	<button class="btn btn-primary" ng-click="next=next+10;findUserMessages(next)" ng-disabled="messages.length<10"><span class="glyphicon glyphicon-chevron-right"></span></button>
+	<table class="table table-striped table-condensed" style="border:1px solid #eee;">
+		<th>Campaign</th>
+		<th>Created on</th>
+		<th>Sent to</th>
+		<th>From</th>
+		<th>Scheduled</th>
+		<th>Delivery</th>
+		<th>View</th>
+		<tr ng-repeat="message in messages" class="repeat-animation">
+			<td>{{message.campaign.name}}</td>
+			<td>{{message.created|date:'d MMM yyyy, hh:mm a'}}</td>
+			<td>
+				<span ng-if="message.sms_options.to.length==1">{{message.sms_options.to.length}} person</span>
+				<span ng-if="message.sms_options.to.length>1">{{message.sms_options.to.length}} people</span> 
+			</td>
+			<td>{{message.sms_options.sender_id}}</td>
+			<td>
+				<span ng-if="message.asap">ASAP</span>
+				<span ng-if="!message.asap">{{message.schedule.timestamp|date:'d/M/yy h:mm a'}}</span>
+			</td>
+			<td>
+				<span ng-if="message.success_rate==-1">Pending</span>
+				<span ng-if="message.success_rate==-2">In Process</span>
+				<span ng-if="message.success_rate!=-1 && message.success_rate!=-2">{{message.success_rate}}%</span>
+			</td>
+			<td>
+				<button class="btn btn-primary" ng-click="viewMessage(message)">View</button>
+			</td>
+		</tr>
+	</table>
+	<div ng-if="messages.length==0">No campaigns yet.</div>
+</section>
+
+<script type="text/ng-template" id="view-message.html">
+    <div class="modal-header">
+        <h4 class="modal-title">{{smsview.sms_options.sender_id}}</h4>
+        {{smsview.created|date:'d MMM yyyy, hh:mm a'}}<br>
+        to: <span ng-repeat="receiver in smsview.sms_options.to" style="max-height:200px;overflow-y:scroll;">{{receiver.name}}<{{receiver.mobile}}>, </span>
+    </div>
+    <div class="modal-body" ng-bind="smsview.sms_options.body"></div>
+    <div class="modal-footer">
+        <button class="btn btn-warning" type="button" ng-click="close()">Close</button>
+    </div>
+</script>

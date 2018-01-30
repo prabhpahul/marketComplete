@@ -1,0 +1,146 @@
+<section ng-init="initMail()">
+	<form class="form-horizontal" name="mailForm" ng-submit="sendMail(mailForm.$valid)" novalidate ng-show="user.provider">
+	  <div class="form-group">
+	    <label for="from" class="col-sm-2 control-label">From:</label>
+	    <div class="col-sm-10">
+	      <input type="email" name="from" class="form-control" id="from" placeholder="Enter your business email id..." ng-model="email.from" required ng-pattern="/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/">
+	      <div ng-show="mailForm.$submitted||mailForm.from.$touched" class="error">
+            <div ng-show="mailForm.from.$error.required">Please enter your email.</div>
+            <div ng-show="mailForm.from.$error.pattern&&email.from!=''">Please enter a valid email address.</div>
+          </div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label for="subject" class="col-sm-2 control-label">Subject:</label>
+	    <div class="col-sm-10">
+	      <input type="text" name="subject" class="form-control" id="subject" placeholder="Subject" ng-model="email.subject" required>
+	      <div ng-show="mailForm.$submitted||mailForm.subject.$touched" class="error">
+            <div ng-show="mailForm.subject.$error.required">Please enter a subject for your email.</div>
+          </div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label for="to" class="col-sm-2 control-label">To:</label>
+	    <div class="col-sm-10">
+	      <input type="text" class="form-control" id="to" value="{{showEmails}}" disabled>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	  	<label for="message" class="col-sm-2 control-label">Message:</label>
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <div id="content"></div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label for="send_at" class="col-sm-2 control-label">Send:</label>
+	    <div class="col-sm-10">
+	    	<label class="radio-inline">
+	      		<input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="true" ng-model="email.asap" /> As soon as possible
+	      	</label>
+	      	<label class="radio-inline">
+	      		<input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="" ng-model="email.asap" />At a scheduled time
+	      	</label>
+		    <div ng-show="!email.asap">
+		    	<div class="col-md-6">
+			      	<input type="date" class="form-control" uib-datepicker-popup min-date="minDate" max-date="maxDate" ng-model="email.schedule.date" ng-required="true" close-text="Close" ng-click="openCalendar=!openedCalendar" is-open="openCalendar" style="margin-top:34px;" />
+			      	<div ng-show="dateErr">
+			      		<span class="error">Please choose a valid date and time</span>
+			      	</div>
+		        </div>
+		        <div class="col-md-6">
+	          		<uib-timepicker ng-model="email.schedule.time" hour-step="1" minute-step="1" show-meridian="true"></uib-timepicker>
+	          	</div>
+	        </div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <button type="submit" class="btn btn-primary" ng-disabled="mailForm.$invalid||dateErr||!user.email_service.status||selectedCustomers.length>user.email_service.available_credits">Send</button>
+	    </div>
+	    <div ng-show="selectedCustomers.length>user.email_service.available_credits" class="error">You don't have enough credits.</div>
+	  </div>
+	</form>
+
+	<div ng-show="!user.provider">
+		<h4>It seems you don't have a mailing service preference setup. Choose from what we currently support - </h4>
+		<div class="mail-service-card link" style="float:left;" ng-click="setProvider('sendgrid')">
+			<div class="service-img col-md-3">	
+          		<img src="assets/images/sendgrid.png" alt="SendGrid" class="img-responsive">
+          	</div>
+          	<div class="service-text col-md-9">
+          		FREE PLAN 12,000 emails per month.<br>
+          		<a href="https://sendgrid.com/pricing" target="_blank">See their email plans and pricing.</a>
+          		Sign up for an account and use the credentials to continue.
+          	</div>
+        </div>
+        <div class="mail-service-card link" style="float:left;" ng-click="setProvider('mailchimp')">
+			<div class="service-img col-md-3">	
+          		<img src="assets/images/mailchimp.jpg" alt="MailChimp" class="img-responsive">
+          	</div>
+          	<div class="service-text col-md-9">
+          		FREE PLAN 12,000 emails per month.<br>
+          		<a href="http://mailchimp.com/pricing/" target="_blank">See their email plans and pricing.</a>
+          		Sign up for an account and use the API KEY to continue.
+          	</div>
+        </div>
+	</div>
+</section>
+
+<script type="text/ng-template" id="saveProviderSendgrid.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Credentials for SendGrid</h3>
+    </div>
+    <div class="modal-body">
+    	Please be carefull in entering these credentials and send a test email from your settings to verify.<br>
+        <form class="form-horizontal" name="sendgridForm" novalidate>
+		  <div class="form-group">
+		    <label for="inputUser3" class="col-sm-2 control-label">Username</label>
+		    <div class="col-sm-10">
+		      <input type="text" name="username" class="form-control" id="inputEmail3" placeholder="Username" ng-model="username" required>
+		      <div ng-show="sendgridForm.$submitted||sendgridForm.username.$touched" class="error">
+            	<div ng-show="sendgridForm.username.$error.required">Username is required.</div>
+          	  </div>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+		    <div class="col-sm-10">
+		      <input type="password" name="password" class="form-control" id="inputPassword3" placeholder="Password" ng-model="password" required>
+		       <div ng-show="sendgridForm.$submitted||sendgridForm.password.$touched" class="error">
+            	<div ng-show="sendgridForm.password.$error.required">Password is required.</div>
+          	   </div>
+		    </div>
+		  </div>
+		</form>
+		<br>
+		<span class="error" ng-if="error">{{error}}</span>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit" ng-click="save(sendgridForm.$valid)">SAVE</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="saveProviderMailchimp.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Credentials for MailChimp</h3>
+    </div>
+    <div class="modal-body">
+    	Please be carefull in entering these credentials and send a test email from your settings to verify.<br>
+        <form class="form-horizontal" name="mailchimpForm" novalidate>
+		  <div class="form-group">
+		    <label for="inputPassword3" class="col-sm-2 control-label">API KEY</label>
+		    <div class="col-sm-10">
+		      <input type="text" name="password" class="form-control" id="inputPassword3" placeholder="Password" ng-model="password" required>
+		       <div ng-show="mailchimpForm.$submitted||mailchimpForm.password.$touched" class="error">
+            	<div ng-show="mailchimpForm.password.$error.required">API KEY is required.</div>
+          	   </div>
+		    </div>
+		  </div>
+		</form>
+		<br>
+		<span class="error" ng-if="error">{{error}}</span>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit" ng-click="save(mailchimpForm.$valid)">SAVE</button>
+    </div>
+</script>
